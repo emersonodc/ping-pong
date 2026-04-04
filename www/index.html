@@ -72,7 +72,7 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 
 .hudBtn{font-family:'Bebas Neue',cursive;font-size:clamp(.48rem,1.8vw,.7rem);letter-spacing:.2em;
   padding:4px 10px;background:rgba(0,0,0,.55);border:1px solid #2a2a4a;color:#555;cursor:pointer;
-  transition:all .2s}
+  transition:all .2s;pointer-events:auto}
 .hudBtn:active{background:rgba(255,255,255,.08)}
 
 /* ── OVERLAYS ── */
@@ -798,6 +798,7 @@ function togglePause(){
     document.getElementById('pauseOv').classList.remove('show');
     aid=requestAnimationFrame(gameLoop);
   } else {
+    if(aid){cancelAnimationFrame(aid);aid=null;}
     draw();
     showMsgOv('PAUSADO','',
       [{label:'▶ RETOMAR', fn:togglePause,  cls:'btn md'},
