@@ -1,0 +1,14 @@
+{
+  "appId": "com.seunome.pingpong",
+  "appName": "Ping Pong",
+  "webDir": "www",
+  "ios": {
+    "allowsLinkPreview": false,
+    "scrollEnabled": false,
+    "backgroundColor": "#07070f"
+  }
+}{
+  "appId": "com.emerson.pingpong",
+  "appName": "The PingPong",
+  "webDir": "www"
+}
