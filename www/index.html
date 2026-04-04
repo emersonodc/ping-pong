@@ -18,10 +18,10 @@
   --gg:0 0 6px #39ff14,0 0 18px #39ff14aa;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;background:#07070f;user-select:none;font-family:'Share Tech Mono',monospace;touch-action:none;
+html,body{width:100%;height:100%;overflow:hidden;background:#07070f;user-select:none;font-family:'Share Tech Mono',monospace;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
 canvas{touch-action:none}
-button{touch-action:manipulation;cursor:pointer}
+button{touch-action:auto;cursor:pointer}
 
 /* scanlines */
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;
@@ -32,7 +32,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:199;
 
 /* ── MAIN LAYOUT: canvas fills screen, overlays on top ── */
 #gameWrap{position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden}
-canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
+canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
 
 /* ── HUD (in-game score/pause bar) ── */
 #hud{
@@ -45,6 +45,7 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 }
 #hud.vis{display:flex}
 #hud>*{pointer-events:auto}
+#hud * {pointer-events:auto}
 
 /* linha principal do HUD */
 #hudMain{display:flex;align-items:center;justify-content:space-between;padding:6px 14px 8px;}
@@ -55,7 +56,7 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 .hudNum.cy{color:var(--cy);text-shadow:var(--gc)}
 .hudNum.pk{color:var(--pk);text-shadow:var(--gp)}
 .hudSep{font-family:'Bebas Neue',cursive;font-size:clamp(1rem,4vw,1.6rem);color:#252540;align-self:center}
-.hudCenter{display:flex;flex-direction:column;align-items:center;gap:1px}
+.hudCenter{display:flex;flex-direction:column;align-items:center;gap:1px;pointer-events:auto}
 .hudLevel{font-family:'Bebas Neue',cursive;font-size:clamp(.45rem,1.8vw,.65rem);letter-spacing:.3em;color:var(--gr);text-shadow:var(--gg)}
 .hudMode{font-family:'Bebas Neue',cursive;font-size:clamp(.38rem,1.4vw,.54rem);letter-spacing:.2em;color:#2a2a2a}
 
@@ -72,7 +73,7 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 
 .hudBtn{font-family:'Bebas Neue',cursive;font-size:clamp(.48rem,1.8vw,.7rem);letter-spacing:.2em;
   padding:4px 10px;background:rgba(0,0,0,.55);border:1px solid #2a2a4a;color:#555;cursor:pointer;
-  transition:all .2s;pointer-events:auto}
+  transition:all .2s;pointer-events:auto;touch-action:auto}
 .hudBtn:active{background:rgba(255,255,255,.08)}
 
 /* ── OVERLAYS ── */
@@ -84,7 +85,7 @@ canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
 
 /* ── Typography ── */
 .ttl{font-family:'Bebas Neue',cursive;font-size:clamp(2.6rem,10vw,4.5rem);
-  letter-spacing:.55em;color:var(--cy);text-shadow:var(--gc);animation:flicker 7s infinite}
+  letter-spacing:.55em;color:var(--cy);text-shadow:var(--gc);animation:flicker 7s infinite;text-align:center;width:100%;margin-left:auto;margin-right:auto}
 @keyframes flicker{0%,94%,100%{opacity:1}95%{opacity:.7}96%{opacity:1}97.5%{opacity:.5}98.5%{opacity:1}}
 
 .stl{font-family:'Bebas Neue',cursive;font-size:clamp(1.4rem,5.5vw,2.8rem);
@@ -791,6 +792,7 @@ function startGame(){
 }
 
 function togglePause(){
+  console.log('togglePause chamada:', {run, gameOver, paused});
   if(!run||gameOver)return;
   paused=!paused;
   if(!paused){
@@ -852,6 +854,22 @@ function gotoMenu(){
 }
 
 window.addEventListener('resize',()=>{resize();if(!run)draw();});
+
+// Adicionar event listener para o botão pause
+const pauseBtn = document.querySelector('.hudBtn');
+if (pauseBtn) {
+  pauseBtn.addEventListener('mousedown', (e) => {
+    console.log('Botão pause mousedown');
+    e.stopPropagation();
+    togglePause();
+  }, true);
+  
+  pauseBtn.addEventListener('touchstart', (e) => {
+    console.log('Botão pause touchstart');
+    e.stopPropagation();
+    togglePause();
+  }, true);
+}
 
 // ── Init ──
 renderKB();
