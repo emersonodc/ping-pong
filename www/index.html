@@ -322,6 +322,51 @@ window.addEventListener('keydown',e=>{
 window.addEventListener('keyup',e=>{keys[e.key]=false;});
 
 // ══════════════════════════════════════════════════
+//  ADMOB (Android / Capacitor)
+// ══════════════════════════════════════════════════
+const AD_IDS={
+  banner:'ca-app-pub-6541705647323354/3555387228',
+  level:'ca-app-pub-6541705647323354/2224852043',
+  pause:'ca-app-pub-6541705647323354/5954319855'
+};
+let adMob=null,adsReady=false,adBusy=false;
+
+function getAdMob(){
+  return window.Capacitor?.Plugins?.AdMob||null;
+}
+
+async function initAds(){
+  if(window.Capacitor?.getPlatform?.()!=='android')return;
+  adMob=getAdMob();
+  if(!adMob)return;
+  try{
+    await adMob.initialize();
+    adsReady=true;
+    await adMob.showBanner({
+      adId:AD_IDS.banner,
+      adSize:'BANNER',
+      position:'BOTTOM_CENTER',
+      margin:0
+    });
+  }catch(err){
+    console.error('AdMob init/banner error',err);
+  }
+}
+
+async function showInterstitial(adId){
+  if(!adsReady||!adMob||adBusy)return;
+  adBusy=true;
+  try{
+    await adMob.prepareInterstitial({adId});
+    await adMob.showInterstitial();
+  }catch(err){
+    console.error('AdMob interstitial error',err);
+  }finally{
+    adBusy=false;
+  }
+}
+
+// ══════════════════════════════════════════════════
 //  GAME STATE
 // ══════════════════════════════════════════════════
 const cv=document.getElementById('c');
@@ -426,6 +471,9 @@ function checkLevel(){
   if(newLv!==hardLevel){
     hardLevel=newLv;
     updateHudLevel();
+    if(scores[0]+scores[1]>0 && (scores[0]+scores[1])%10===0){
+      showInterstitial(AD_IDS.level);
+    }
     // brief level-up flash
     const el=document.getElementById('hudLvl');
     el.style.color='#fff';
@@ -802,6 +850,7 @@ function togglePause(){
   } else {
     if(aid){cancelAnimationFrame(aid);aid=null;}
     draw();
+    showInterstitial(AD_IDS.pause);
     showMsgOv('PAUSADO','',
       [{label:'▶ RETOMAR', fn:togglePause,  cls:'btn md'},
        {label:'🏠 DESISTIR',fn:gotoMenu,   cls:'btn md ghost'}]);
@@ -855,22 +904,6 @@ function gotoMenu(){
 
 window.addEventListener('resize',()=>{resize();if(!run)draw();});
 
-// Adicionar event listener para o botão pause
-const pauseBtn = document.querySelector('.hudBtn');
-if (pauseBtn) {
-  pauseBtn.addEventListener('mousedown', (e) => {
-    console.log('Botão pause mousedown');
-    e.stopPropagation();
-    togglePause();
-  }, true);
-  
-  pauseBtn.addEventListener('touchstart', (e) => {
-    console.log('Botão pause touchstart');
-    e.stopPropagation();
-    togglePause();
-  }, true);
-}
-
 // ── Init ──
 renderKB();
 setMode('bot');   // CPU pré-selecionado
@@ -878,6 +911,7 @@ setDiff('normal'); // Normal pré-selecionado
 updateCtrlDesc();
 resize();
 draw();
+initAds();
 </script>
 </body>
 </html>
